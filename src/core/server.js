@@ -4,13 +4,15 @@ const logger = require('./utils/logger')('ServerClass');
 const { ServerError } = require('./types/errors');
 const DataTransformer = require('./utils/dataTransformer');
 const { UnauthorizedStack } = require('./types/storages');
+const { ActionController, EventController } = require('./types/controllers');
 
 class Server {
   constructor(port, options = { authTimeout: 60000 }) {
     this._port = port;
     this._options = options;
     this._authHandler = async (client) => true;
-    this._authStack = new UnauthorizedStack(options.authTimeout)
+    this._authStack = new UnauthorizedStack(options.authTimeout);
+    this._actions = [];
   }
 
   /**
@@ -56,6 +58,24 @@ class Server {
    */
   setAuthHandler(fn) {
     this._authHandler = fn;
+  }
+
+  /**
+   * 
+   * @param {ActionController} action - accept ActionController inherit class instance
+   */
+  addAction(action) {
+    if (!(action instanceof ActionController)) {
+      throw new TypeError(`Action ${action.constructor.name} is not instance of ActionController-based class`);
+    }
+
+    this._actions.push(action);
+  }
+
+  addEvent(event) {
+    if (!(event instanceof EventController)) {
+      throw new TypeError(`Event ${event.constructor.name} is not instance of EventnController-based class`);
+    }
   }
 }
 
