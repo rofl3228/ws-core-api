@@ -1,5 +1,6 @@
 const logger = require('./utils/logger')('ClientClass');
 const WebSocket = require('ws');
+const { ClientError } = require('./types/errors');
 
 class Client {
   constructor(url, options = {}) {
@@ -20,15 +21,21 @@ class Client {
   }
 
   #openHandler = async () => {
-    logger.debug('Connection established');
-    const isAuthorised = await this._authAction(this._ws);
-
-    if (isAuthorised) {
-      logger.debug('Client authorized');
-
-      this._ws.on('message', this.#messageHandler);
-      this._ws.on('error', this.#errorHandler);
-      this._ws.on('close', this.#closeHandler);
+    try {
+      logger.debug('Connection established');
+      const isAuthorised = await this._authAction(this._ws);
+  
+      if (isAuthorised) {
+        logger.debug('Client authorized');
+  
+        this._ws.on('message', this.#messageHandler);
+        this._ws.on('error', this.#errorHandler);
+        this._ws.on('close', this.#closeHandler);
+      } else {
+        throw new ClientError('UNAUTHORIZED');
+      }
+    } catch (error) {
+      logger.err(error);
     }
   }
 
@@ -43,11 +50,12 @@ class Client {
   }
 
   #errorHandler = (error) => {
-
+    logger.err(error);
+    throw new ClientError(error);
   }
 
   #closeHandler = (code, error) => {
-
+    logger.debug(code, error);
   }
 }
 

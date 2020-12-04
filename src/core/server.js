@@ -3,12 +3,14 @@ const WebSocket = require('ws');
 const logger = require('./utils/logger')('ServerClass');
 const { ServerError } = require('./types/errors');
 const DataTransformer = require('./utils/dataTransformer');
+const { UnauthorizedStack } = require('./types/storages');
 
 class Server {
-  constructor(port, options = {}) {
+  constructor(port, options = { authTimeout: 60000 }) {
     this._port = port;
     this._options = options;
     this._authHandler = async (client) => true;
+    this._authStack = new UnauthorizedStack(options.authTimeout)
   }
 
   /**
@@ -27,15 +29,15 @@ class Server {
 
   #connectionHandler = async (client) => {
     logger.debug('New client connected');
+    this._authStack.add(client);
 
     const isAuthorised = await this._authHandler(client);
 
+    this._authStack.delete(client);
     if (isAuthorised) {
       logger.debug('Client authorized');
       client.on('message', this.#messageHandler);
       client.on('close', this.#disconnectHandler);
-    } else {
-
     }
   }
 

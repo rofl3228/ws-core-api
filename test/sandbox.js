@@ -23,6 +23,8 @@ const authFunction = async (client) => {
   });
 };
 
-const server = new Server(3000);
+const server = new Server(3000, {
+  authTimeout: 15000,
+});
 server.setAuthHandler(authFunction);
 server.init();
