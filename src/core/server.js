@@ -2,16 +2,21 @@ const WebSocket = require('ws');
 
 const logger = require('./utils/logger')('ServerClass');
 const { ServerError } = require('./types/errors');
+const ServerClient = require('./serverClient');
 const DataTransformer = require('./utils/dataTransformer');
-const { UnauthorizedStack } = require('./types/storages');
+const { UnauthorizedStack, ServerClientsPool } = require('./types/storages');
 const { ActionController, EventController } = require('./types/controllers');
 
 class Server {
-  constructor(port, options = { authTimeout: 60000 }) {
+  constructor(port, options = { authTimeout: 60000, connectionsLimit: 1024 }) {
     this._port = port;
     this._options = options;
-    this._authHandler = async (client) => true;
     this._authStack = new UnauthorizedStack(options.authTimeout);
+    this._clients = new ServerClientsPool(options.connectionsLimit);
+    this._authHandler = async (client) => true;
+    this._nameGetter = async (client) => {
+      return `client-${this._clients.size}`;
+    };
     this._actions = [];
   }
 
@@ -33,24 +38,15 @@ class Server {
     logger.debug('New client connected');
     this._authStack.add(client);
 
-    const isAuthorised = await this._authHandler(client);
+    const isAuthorized = await this._authHandler(client);
 
     this._authStack.delete(client);
-    if (isAuthorised) {
+    if (isAuthorized) {
+      this._clients.add(this._nameGetter(client), new ServerClient(client));
       logger.debug('Client authorized');
-      client.on('message', this.#messageHandler);
-      client.on('close', this.#disconnectHandler);
     }
   }
 
-  #messageHandler = async (message) => {
-    const incomingData = DataTransformer.decode(message);
-    logger.debug('Incoming message: ', incomingData);
-  }
-
-  #disconnectHandler = () => {
-    logger.debug('Client disconnected');
-  }
 
   /**
    * 
@@ -58,6 +54,10 @@ class Server {
    */
   setAuthHandler(fn) {
     this._authHandler = fn;
+  }
+
+  setClientNameGetter(fn) {
+    this._nameGetter = fn
   }
 
   /**
@@ -76,6 +76,10 @@ class Server {
     if (!(event instanceof EventController)) {
       throw new TypeError(`Event ${event.constructor.name} is not instance of EventnController-based class`);
     }
+  }
+
+  getClient(name) {
+    return this._clients.get(name);
   }
 }
 

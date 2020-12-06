@@ -22,3 +22,5 @@ const authFunction = async (ws) => {
 const client = new Client('ws://localhost:3000');
 client.setAuthAction(authFunction);
 client.init();
+
+console.log(typeof Proxy);

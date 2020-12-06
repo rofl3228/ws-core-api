@@ -1,7 +1,6 @@
-const Server = require('../src/core/server');
-const DataTransformer = require('../src/core/utils/dataTransformer');
-
-const { ActionController, EventController } = require('../src/core/types/controllers');
+const coreAPI = require('../lib/ws-core-api');
+const { Server, Utils, ActionController, EventController } = coreAPI;
+const DataTransformer = Utils.DataTransformer;
 
 const authFunction = async (client) => {
   return new Promise((resolve, reject) => {
