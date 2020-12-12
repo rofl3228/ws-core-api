@@ -1,6 +1,19 @@
+const { EventControllerError } = require('../errors');
+const DataTransformer = require('../../utils/dataTransformer');
+
 class EventController {
-  get name() {
-    return this.constructor.name;
+  constructor(transport) {
+    this._transport = transport;
+  }
+
+  async execute() {
+    throw new EventControllerError('NOT_IMPLEMENTED');
+  }
+
+  async send() {
+    const data = {
+      
+    }
   }
 }
 

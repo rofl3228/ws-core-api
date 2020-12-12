@@ -24,15 +24,17 @@ const authFunction = async (client) => {
   });
 };
 
-class BotsAction extends ActionController {
-  constructor(name){
-    super(name);
+class GetInfo extends EventController {
+  async execute() {
+    return {serverTime: new Date().getTime()};
   }
 }
 
-const server = new Server(3000, {
-  authTimeout: 15000,
-});
-server.setAuthHandler(authFunction);
-server.addAction(new BotsAction());
-server.init();
+(async () => {
+  const server = new Server(3000, {
+    authTimeout: 15000,
+  });
+  server.setAuthHandler(authFunction);
+  server.addEvent(GetInfo)
+  await server.init();
+})();

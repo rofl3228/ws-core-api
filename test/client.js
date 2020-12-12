@@ -1,5 +1,6 @@
 const Client = require('../src/core/client');
 const DataTransformer = require('../src/core/utils/dataTransformer');
+const { EventController, ActionController } = require('../lib/ws-core-api');
 
 const authFunction = async (ws) => {
   return new Promise((resolve, reject) => {
@@ -19,8 +20,23 @@ const authFunction = async (ws) => {
   });
 };
 
-const client = new Client('ws://localhost:3000');
-client.setAuthAction(authFunction);
-client.init();
+class GetInfo extends ActionController {
+  async execute() {
+    return {};
+  }
 
-console.log(typeof Proxy);
+  async callback(data) {
+    console.log(data);
+  }
+}
+
+(async () => {
+  const client = new Client('ws://localhost:3000');
+  client.setAuthAction(authFunction);
+  client.addAction(GetInfo);
+  await client.init();
+
+  setTimeout(async () => {
+    await client.do('GetInfo');
+  }, 800);
+})();

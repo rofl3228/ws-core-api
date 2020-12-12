@@ -4,7 +4,7 @@ const logger = require('./utils/logger')('ServerClass');
 const { ServerError } = require('./types/errors');
 const ServerClient = require('./serverClient');
 const DataTransformer = require('./utils/dataTransformer');
-const { UnauthorizedStack, ServerClientsPool } = require('./types/storages');
+const { CallbackStack, UnauthorizedStack, ServerClientsPool } = require('./types/storages');
 const { ActionController, EventController } = require('./types/controllers');
 
 class Server {
@@ -13,11 +13,13 @@ class Server {
     this._options = options;
     this._authStack = new UnauthorizedStack(options.authTimeout);
     this._clients = new ServerClientsPool(options.connectionsLimit);
+    this._callbacks = new CallbackStack();
     this._authHandler = async (client) => true;
     this._nameGetter = async (client) => {
       return `client-${this._clients.size}`;
     };
-    this._actions = [];
+    this._actions = new Map();
+    this._events = new Map();
   }
 
   /**
@@ -42,7 +44,7 @@ class Server {
 
     this._authStack.delete(client);
     if (isAuthorized) {
-      this._clients.add(this._nameGetter(client), new ServerClient(client));
+      this._clients.add(this._nameGetter(client), new ServerClient(client, this._events, this._actions, this._callbacks));
       logger.debug('Client authorized');
     }
   }
@@ -62,20 +64,24 @@ class Server {
 
   /**
    * 
-   * @param {ActionController} action - accept ActionController inherit class instance
+   * @param {ActionController} ActionClass - accept ActionController inherit class instance
    */
-  addAction(action) {
-    if (!(action instanceof ActionController)) {
-      throw new TypeError(`Action ${action.constructor.name} is not instance of ActionController-based class`);
+  addAction(ActionClass) {
+    if (!(ActionClass.prototype instanceof ActionController)) {
+      throw new TypeError(`Action ${ActionClass.name} is not instance of ActionController-based class`);
     }
 
-    this._actions.push(action);
+    this._actions.set(ActionClass.name, ActionClass);
   }
 
-  addEvent(event) {
-    if (!(event instanceof EventController)) {
-      throw new TypeError(`Event ${event.constructor.name} is not instance of EventnController-based class`);
+  addEvent(EventClass) {
+    logger.debug(`Add event ${EventClass.name}`)
+
+    if (!(EventClass.prototype instanceof EventController)) {
+      throw new TypeError(`Event ${EventClass.name} is not instance of EventnController-based class`);
     }
+    
+    this._events.set(EventClass.name, EventClass);
   }
 
   getClient(name) {
