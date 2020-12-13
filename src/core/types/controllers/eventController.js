@@ -10,10 +10,15 @@ class EventController {
     throw new EventControllerError('NOT_IMPLEMENTED');
   }
 
-  async send() {
-    const data = {
-      
-    }
+  async send(key, data) {
+    const toSend = {
+      type: 'event',
+      name: this.constructor.name,
+      data: await this.execute(data),
+      key,
+    };
+
+    this._transport.send(DataTransformer.encode(toSend));
   }
 }
 

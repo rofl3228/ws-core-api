@@ -1,6 +1,7 @@
 const Client = require('../src/core/client');
 const DataTransformer = require('../src/core/utils/dataTransformer');
 const { EventController, ActionController } = require('../lib/ws-core-api');
+const logger = require('../src/core/utils/logger')('Client');
 
 const authFunction = async (ws) => {
   return new Promise((resolve, reject) => {
@@ -26,7 +27,14 @@ class GetInfo extends ActionController {
   }
 
   async callback(data) {
-    console.log(data);
+    logger.info(data);
+  }
+}
+
+class Ping extends EventController {
+  async execute() {
+    logger.debug('called ping event')
+    return { response: 'pong' };
   }
 }
 
@@ -34,6 +42,7 @@ class GetInfo extends ActionController {
   const client = new Client('ws://localhost:3000');
   client.setAuthAction(authFunction);
   client.addAction(GetInfo);
+  client.addEvent(Ping);
   await client.init();
 
   setTimeout(async () => {

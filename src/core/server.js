@@ -4,7 +4,7 @@ const logger = require('./utils/logger')('ServerClass');
 const { ServerError } = require('./types/errors');
 const ServerClient = require('./serverClient');
 const DataTransformer = require('./utils/dataTransformer');
-const { CallbackStack, UnauthorizedStack, ServerClientsPool } = require('./types/storages');
+const { UnauthorizedStack, ServerClientsPool } = require('./types/storages');
 const { ActionController, EventController } = require('./types/controllers');
 
 class Server {
@@ -13,7 +13,6 @@ class Server {
     this._options = options;
     this._authStack = new UnauthorizedStack(options.authTimeout);
     this._clients = new ServerClientsPool(options.connectionsLimit);
-    this._callbacks = new CallbackStack();
     this._authHandler = async (client) => true;
     this._nameGetter = async (client) => {
       return `client-${this._clients.size}`;
@@ -44,8 +43,9 @@ class Server {
 
     this._authStack.delete(client);
     if (isAuthorized) {
-      this._clients.add(this._nameGetter(client), new ServerClient(client, this._events, this._actions, this._callbacks));
-      logger.debug('Client authorized');
+      const clientName = await this._nameGetter(client);
+      this._clients.add(clientName, new ServerClient(client, this._events, this._actions));
+      logger.debug(`Client authorized: ${clientName}`);
     }
   }
 

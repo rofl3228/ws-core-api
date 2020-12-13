@@ -15,7 +15,7 @@ class ServerClientsPool {
   }
 
   get(name) {
-    this._pool.get(name);
+    return this._pool.get(name);
   }
 
   get size() {

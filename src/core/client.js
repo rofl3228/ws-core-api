@@ -54,7 +54,10 @@ class Client {
       if (!this._events.has(incomingData.name)) {
         throw new ClientError(`UNKNOWN_EVENT ${incomingData.name}`);
       }
-      await this._events.get(incomingData.name).execute(incomingData.data);
+      
+      const EventClass = this._events.get(incomingData.name);
+      const event = new EventClass(this._ws);
+      await event.send(incomingData.key, incomingData.data);
 
     } else if (incomingData.type === 'event') {
       if (this._callbacks.has(incomingData.key)) {
