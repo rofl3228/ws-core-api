@@ -57,6 +57,8 @@ class Ping extends ActionController {
   server.addEvent(GetInfo);
   server.addAction(Ping);
   await server.init();
+
+  // example of action executing
   setTimeout(async () => {
     try {
       await server.getClient('client-0').do('Ping');
