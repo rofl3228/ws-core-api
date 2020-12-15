@@ -17,6 +17,9 @@ class Server {
     this._nameGetter = async (client) => {
       return `client-${this._clients.size}`;
     };
+    this._errorHandler = (error) => {
+      logger.err(error);
+    }
     this._actions = new Map();
     this._events = new Map();
   }
@@ -44,8 +47,11 @@ class Server {
     this._authStack.delete(client);
     if (isAuthorized) {
       const clientName = await this._nameGetter(client);
-      this._clients.add(clientName, new ServerClient(client, this._events, this._actions));
+      this._clients.add(clientName, new ServerClient(client, this._events, this._actions, this._errorHandler));
       logger.debug(`Client authorized: ${clientName}`);
+    } else {
+      client.on('close', () => logger.debug('Client kicked'));
+      await client.close(1010);
     }
   }
 
@@ -82,6 +88,10 @@ class Server {
     }
     
     this._events.set(EventClass.name, EventClass);
+  }
+
+  setErrorHandler(fn) {
+    this._errorHandler = fn;
   }
 
   getClient(name) {

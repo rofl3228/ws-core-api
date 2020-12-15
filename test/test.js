@@ -6,7 +6,7 @@ function a(b, c) {
 function z() {
   console.log(...arguments);
   this.my = 123132123;
-  return a.apply(this, arguments);
+  return a.apply({a: "this"}, arguments);
 }
 
 console.log(z(2, 2));

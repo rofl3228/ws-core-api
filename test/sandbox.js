@@ -1,5 +1,5 @@
 const coreAPI = require('../lib/ws-core-api');
-const { Server, Utils, ActionController, EventController } = coreAPI;
+const { Server, Utils, ActionController, EventController, Errors } = coreAPI;
 const { DataTransformer, logger }= Utils;
 const log = logger('Server');
 
@@ -26,8 +26,15 @@ const authFunction = async (client) => {
   });
 };
 
+class GetInfoError extends Errors.EventControllerError {
+  constructor(message) {
+    super(message);
+  }
+}
+
 class GetInfo extends EventController {
   async execute() {
+    throw new GetInfoError('TEST');
     return {serverTime: new Date().getTime()};
   }
 }
@@ -51,6 +58,10 @@ class Ping extends ActionController {
   server.addAction(Ping);
   await server.init();
   setTimeout(async () => {
-    await server.getClient('client-0').do('Ping');
+    try {
+      await server.getClient('client-0').do('Ping');
+    } catch (e) {
+      log.err(e);
+    }
   }, 3000);
 })();

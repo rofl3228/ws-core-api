@@ -4,6 +4,7 @@ const { CallbackStack } = require('./types/storages');
 const { ClientError } = require('./types/errors');
 const { ActionController, EventController } = require('./types/controllers');
 const DataTransformer = require('./utils/dataTransformer');
+const MessageHandler = require('./utils/messageHandler');
 
 class Client {
   constructor(url, options = {reconnectTimeout: 2000, reconnectable: true}) {
@@ -11,6 +12,9 @@ class Client {
     this._reconnectable = options.reconnectable;
     this._reconnectTimeout = options.reconnectTimeout;
     this._authAction = async () => true;
+    this._errorHandler = (error) => {
+      logger.err(error);
+    }
     this._callbacks = new CallbackStack();
     
     this._actions = new Map();
@@ -23,6 +27,7 @@ class Client {
     
     this._ws.on('open', this.#openHandler);
     this._ws.on('error', this.#errorHandler);
+    this._messageHandler = new MessageHandler(this._ws, this._events, this._callbacks, this._errorHandler, ClientError);
   }
 
   setAuthAction(fn) {
@@ -36,9 +41,9 @@ class Client {
   
       if (isAuthorised) {
         logger.debug('Client authorized');
-  
-        this._ws.on('message', this.#messageHandler);
+
         this._ws.on('close', this.#closeHandler);
+        this._ws.on('message', this.#messageHandler);
       } else {
         throw new ClientError('UNAUTHORIZED');
       }
@@ -48,25 +53,7 @@ class Client {
   }
 
   #messageHandler = async (message) => {
-    const incomingData = DataTransformer.decode(message);
-
-    if (incomingData.type === 'action') {
-      if (!this._events.has(incomingData.name)) {
-        throw new ClientError(`UNKNOWN_EVENT ${incomingData.name}`);
-      }
-      
-      const EventClass = this._events.get(incomingData.name);
-      const event = new EventClass(this._ws);
-      await event.send(incomingData.key, incomingData.data);
-
-    } else if (incomingData.type === 'event') {
-      if (this._callbacks.has(incomingData.key)) {
-        await this._callbacks.get(incomingData.key)(incomingData.data);
-      }
-
-    } else {
-      throw new ClientError('UNKNOWN_MESSAGE_TYPE');
-    }
+    await this._messageHandler.handle(message);
   }
 
   #errorHandler = (error) => {
@@ -106,6 +93,10 @@ class Client {
     }
 
     this._actions.set(ActionClass.name, ActionClass);
+  }
+
+  setErrorHandler(fn) {
+    this._errorHandler = fn;
   }
 
   do(actionName, data = null) {
