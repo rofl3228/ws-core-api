@@ -1,0 +1,81 @@
+{
+  "env": {
+    "browser": false,
+    "node": true,
+    "mocha": true
+  },
+  "extends": [
+    "airbnb-base"
+  ],
+  "plugins": [
+    "standard",
+    "promise",
+    "sort-requires",
+    "jsdoc"
+  ],
+  "rules": {
+    "quotes": ["error", "single", { "allowTemplateLiterals": true, "avoidEscape": true }],
+    "prefer-destructuring": "off",
+    "no-mixed-operators": "off",
+    "max-classes-per-file": "off",
+    "no-underscore-dangle": "off",
+    "no-nested-ternary": "off",
+    "brace-style": ["error", "stroustrup"],
+    "no-plusplus": "off",
+    "object-curly-spacing": "off",
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "next", "ignoreRestSiblings": true }],
+    "no-continue": "off",
+    "sort-requires/sort-requires": 2,
+    "jsdoc/require-returns-type": 1,
+    "jsdoc/require-returns": 1,
+    "jsdoc/require-property-type": 1,
+    "jsdoc/require-property-name": 1,
+    "jsdoc/require-param-type": 1,
+    "jsdoc/require-param-name": 1,
+    "jsdoc/require-param": 1,
+    "max-len": ["error", 140, 2, {
+      "ignoreUrls": true,
+      "ignoreComments": false,
+      "ignoreRegExpLiterals": true,
+      "ignoreStrings": true,
+      "ignoreTemplateLiterals": true
+    }],
+    "indent": ["error", 2, {
+      "SwitchCase": 1,
+      "VariableDeclarator": 1,
+      "outerIIFEBody": 1,
+      "FunctionDeclaration": {
+        "parameters": 1,
+        "body": 1
+      },
+      "FunctionExpression": {
+        "parameters": 1,
+        "body": 1
+      },
+      "CallExpression": {
+        "arguments": 1
+      },
+      "ArrayExpression": 1,
+      "ObjectExpression": 1,
+      "ImportDeclaration": 1,
+      "flatTernaryExpressions": true
+    }],
+    "padding-line-between-statements": [
+      "warn",
+      { "blankLine": "always", "prev": "empty", "next": "cjs-export" },
+      { "blankLine": "always", "prev": "*", "next": "class" },
+      { "blankLine": "any", "prev": "class", "next": "class" }
+    ],
+    "spaced-comment": ["error", "always", {
+      "line": {
+        "exceptions": ["-", "+"],
+        "markers": ["=", "!", "#"]
+      },
+      "block": {
+        "exceptions": ["-", "+"],
+        "markers": ["=", "!", "#"],
+        "balanced": true
+      }
+    }]
+  }
+}
