@@ -7,6 +7,10 @@
     "name": "kirill.feofanov",
     "email": "kir.mbr@gmail.com"
   },
+  "contributors": [
+    "Kirill Feofanov <kir.mbr@gmail.com>",
+    "Dmitriy Sychev <dimkasychevv@gmail.com>"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/rofl3228/ws-core-api.git"
@@ -36,7 +40,7 @@
     "grunt-contrib-nodeunit": "~0.2.0",
     "grunt-contrib-watch": "~0.5.3"
   },
-  "keywords": [],
+  "keywords": ["ws", "api", "websocket", "ws client", "ws api"],
   "dependencies": {
     "chalk": "^4.1.0",
     "moment": "^2.29.1",
