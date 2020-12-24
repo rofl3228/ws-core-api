@@ -1,7 +1,7 @@
 [![lib-logo.png](https://i.postimg.cc/vTmCk2dS/lib-logo.png)](https://postimg.cc/r0vhtJsS)
 # ws-core-api
 
-api arch based on websocket [Ru](https://github.com/rofl3228/ws-core-api/edit/main/README_RU.md)
+api arch based on websocket [Ru](https://github.com/rofl3228/ws-core-api/blob/main/README_RU.md)
 
 ## General Concept
 
