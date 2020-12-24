@@ -45,10 +45,10 @@ const { Client } = coreAPI;
 ## Документация  
 
 Структура библиотеки:
-- Server
-- Client
-- ActionController
-- EventController
+- [Server](#server)
+- [Client](#client)
+- [ActionController](#actionController)
+- [EventController](#eventController)
 - Errors
   - ActionControllerError
   - EventControllerError
