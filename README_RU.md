@@ -1,3 +1,6 @@
+[![lib-logo.png](https://i.postimg.cc/vTmCk2dS/lib-logo.png)](https://postimg.cc/r0vhtJsS)
+# ws-core-api
+
 ## Общая концепция
 
 ### Принцип взаимодействия  
